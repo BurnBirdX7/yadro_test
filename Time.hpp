@@ -25,7 +25,20 @@ namespace club {
         }
 
         [[nodiscard]]
+        inline int units() const {
+            return units_;
+        }
+
+        [[nodiscard]]
         std::string toString() const;
+
+        [[nodiscard]]
+        Time roundUp() const;
+
+        Time& operator+=(Time const& other);
+        Time& operator-=(Time const& other);
+        Time operator+(Time const& other) const;
+        Time operator-(Time const& other) const;
 
         auto operator<=>(Time const& time) const = default;
 

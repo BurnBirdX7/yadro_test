@@ -1,8 +1,23 @@
 #include <sstream>
 #include <format>
+#include <utility>
 #include "Event.hpp"
 
 using namespace club;
+
+
+Event::Event(Time time, EventType type, std::string text)
+        : time_(time)
+        , type_(type)
+        , text_(std::move(text))
+{}
+
+Event::Event(Time time, EventType type, std::string name, int table)
+        : time_(time)
+        , type_(type)
+        , text_(std::move(name))
+        , table_(table)
+{}
 
 EventType Event::type() const {
     return type_;
@@ -62,12 +77,6 @@ Event Event::from_string(std::string const& string) {
 
     return event;
 }
-
-Event::Event(Time time, EventType type, std::string const& text)
-    : time_(time)
-    , type_(type)
-    , text_(text)
-{}
 
 std::string Event::toString() const {
     std::string str = time_.toString() + ' ' + std::to_string(static_cast<int>(type_)) + ' ' + text_;

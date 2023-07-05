@@ -16,31 +16,44 @@ namespace club {
     public:
         using queue_t = std::deque<Event>;
 
-        Model(int table_count, Time start, Time end, queue_t queue);
+        Model(int table_count, Time start, Time end, int hour_price, queue_t queue);
 
         void run();
 
     private: // auxiliary
         void produce_error(std::string const& msg);
-        void table_freed(int table_id);
+        void update_revenue(int table_id, Time start_time);
+        void open_table(int table_id);
+
+        // Views:
+        bool client_inside(std::string const& client);
+        bool client_in_queue(std::string const& client);
+        bool client_sits(std::string const& client);
 
     private:
-        // Essential
+        // Essential:
         Time start_;
         Time end_;
-        queue_t event_queue_;
+        int hour_price_;
 
-        // State
+        // State:
         bool open_ = false;
+        queue_t event_queue_;
         Time current_time_ = {};
 
         // Clients:
-        std::map<std::string /* name */, int /* table number */> clients_inside_ = {};
+        /**
+         * Client Status: int
+         * > 0 - table ID
+         * = 0 - inside the club
+         * < 0 - waits in the queue
+         */
+        std::map<std::string, int> client_status = {};
         std::deque<std::string> client_queue_;
 
         // Table statistics:
         using table_info = std::pair<std::string /* who */, Time /* since when */>;
-        std::vector<std::optional<table_info>> table_;
+        std::vector<std::optional<table_info>> table_status_;
         std::vector<int> table_revenue_;
         int open_tables_;
 
@@ -61,7 +74,6 @@ namespace club {
         void client_sat(Event const& event);
         void client_waits(Event const& event);
         void client_walked_out(Event const& event);
-        void error(Event const& event);
     };
 
 }

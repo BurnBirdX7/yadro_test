@@ -20,7 +20,8 @@ namespace club {
 
     class Event {
     public:
-        Event(Time time, EventType type, std::string const& text = "");
+        Event(Time time, EventType type, std::string text = "");
+        Event(Time time, EventType type, std::string name, int table);
         static Event from_string(std::string const& input);
 
         [[nodiscard]] EventType   type()    const;
