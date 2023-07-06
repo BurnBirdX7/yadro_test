@@ -22,7 +22,8 @@ target_include_directories(task PUBLIC include)
 target_compile_options(task PUBLIC -pedantic -Wall -Werror)
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     message(NOTICE "Adding debug options...")
-    target_compile_options(task PUBLIC -O0 -g)
+    target_compile_options(task PUBLIC -fsanitize=address -O0 -g)
+    target_link_libraries(task asan)
 endif ()
 
 
