@@ -44,7 +44,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        gcc_version: [ 12, 13, 14 ]
+        clang_version: [ 12, 13, 14 ]
         build_type: [ Release, Debug ]
 
     runs-on: ubuntu-22.04
