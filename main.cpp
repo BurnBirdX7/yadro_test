@@ -1,12 +1,9 @@
 #include <iostream>
-#include <cstdint>
-#include <map>
-#include <set>
 #include <string>
 #include <deque>
-#include <queue>
 #include <fstream>
 #include <sstream>
+#include <tuple>
 #include "Event.hpp"
 #include "Model.hpp"
 
@@ -17,24 +14,24 @@ void printHelp() {
 
 using namespace club;
 
-int main(int argc, char** argv) {
-    if (argc != 2) {
-        printHelp();
-        return 0;
-    }
+struct PrintLineError : public std::runtime_error {
+    explicit PrintLineError(std::string const& msg) : std::runtime_error(msg) {}
+};
 
-    auto fin = std::ifstream(argv[1]);
-
-    if (!fin) {
-        std::cerr << "Cannot open file";
-        return 0;
-    }
-
+/**
+ * Parses header of the file
+ * <table_count>
+ * <start_time> <end_time>
+ * <hourly_price>
+ * @param in stream to parse
+ * @return tuple: (table_count, start_time, end_time, hourly_price)
+ * @throws PrintLineError thrown when error occurs during parsing, content must be printed
+ */
+std::tuple<int, Time, Time, int> parse_header(std::istream& in) {
     std::string count_str, time_str, price_str;
-
-    std::getline(fin, count_str);
-    std::getline(fin, time_str);
-    std::getline(fin, price_str);
+    std::getline(in, count_str);
+    std::getline(in, time_str);
+    std::getline(in, price_str);
 
     int table_count, price;
     Time start_time{}, end_time{};
@@ -59,29 +56,66 @@ int main(int argc, char** argv) {
         current_line = price_str;
         price = std::stoi(price_str);
     } catch (std::runtime_error const&) {
-        std::cout << current_line;
-        return 0;
+        throw PrintLineError(current_line);
     }
 
-    Model::queue_t incoming_events{};
-    Time lastTime{};
-    while (!fin.eof()) {
+    return {table_count, start_time, end_time, price};
+}
+
+/**
+ * Parses event queue
+ * @param in stream to parse
+ * @return queue
+ * @throws PrintLineError thrown when error occurs during parsing, content must be printed
+ */
+Model::queue_t parse_events(std::istream& in) {
+    Model::queue_t events{};
+    Time lastTime{}; // Mark to track that time of incoming events is in ascending order
+
+    while (!in.eof()) {
         std::string line;
-        std::getline(fin, line);
-        try {
+        std::getline(in, line);
+        try { // Catches low(er)-level parsing errors, system_error
             Event event = Event::from_string(line);
             if (event.time() < lastTime) {
-                throw std::runtime_error("Wrong time order");
+                throw PrintLineError(line);
             }
-            incoming_events.push_back(event);
+            events.push_back(event);
 
             lastTime = event.time();
-        } catch (std::runtime_error const& error) {
-            std::cout << line << ": " << error.what();
-            return 0;
+        } catch (std::system_error const& error) {
+            throw PrintLineError(line);
         }
     }
 
-    auto model = Model(table_count, start_time, end_time, price, std::move(incoming_events));
-    model.run();
+    return events;
+}
+
+int main(int argc, char** argv) {
+    if (argc != 2) {
+        printHelp();
+        return 0;
+    }
+
+    auto fin = std::ifstream(argv[1]);
+
+    if (!fin) {
+        std::cerr << "Cannot open file";
+        return 0;
+    }
+
+    try { // Catches parsing errors, PrintLineError
+        auto [table_count, start_time, end_time, price] = parse_header(fin);
+        auto incoming_events = parse_events(fin);
+
+        auto model = Model(table_count, start_time, end_time, price, std::move(incoming_events));
+        model.run();
+
+    } catch (PrintLineError& error) {
+        std::cout << error.what() << '\n';
+        return 0;
+    } catch (std::runtime_error& error) {
+        // ignore ...
+    }
+
 }

@@ -31,27 +31,54 @@ namespace club {
     public:
         using queue_t = std::deque<Event>;
 
-        Model(int table_count, Time start, Time end, int hour_price, queue_t queue);
+        /**
+         * Constructor
+         * @param table_count how many tables are in the club
+         * @param start when club opens
+         * @param end when club closes
+         * @param hourly_price hourly rate of every table in the club
+         * @param queue initial state of event queue
+         */
+        Model(int table_count, Time start, Time end, int hourly_price, queue_t queue);
 
-        void run();
+        /**
+         * Runs model simulation
+         * @param out output stream
+         */
+        void run(std::ostream& out = std::cout);
 
     private: // auxiliary
+        /**
+         * Adds error event to the event queue
+         * @param msg error message
+         */
         void produce_error(std::string const& msg);
-        void update_revenue(int table_id);
+
+        /**
+         * Updates table statistics
+         * @param table_id table to update
+         */
+        void update_table_statistics(int table_id);
+
+        /**
+         * Open table to new clients, updates statistics and corrects state
+         * May add FORCED_SAT event to the queue
+         * @param table_id table to open
+         */
         void open_table(int table_id);
 
     private:
         // Essential:
-        Time start_;
-        Time end_;
-        int hour_price_;
+        Time opening_time_;
+        Time closing_time_;
+        int hourly_price_;
 
         // State:
-        bool open_ = false;
+        bool is_open_ = false;
         queue_t event_queue_;
         Time current_time_ = {};
 
-        // Clients:
+        // Client statistics:
         /**
          * Client Status: int
          * > 0 - table ID
@@ -65,17 +92,20 @@ namespace club {
         std::vector<TableStatistics> table_statistics_;
         int open_tables_;
 
-    public: // handlers
+    public: // Event handlers
         using handler_f = void (Model::*)(Event const&);
         std::unordered_map<EventType, handler_f> const handlers_ = {
+                // Incoming events
                 {EventType::CLIENT_WALKED_IN, &Model::client_walked_in},
                 {EventType::CLIENT_SAT, &Model::client_sat},
                 {EventType::CLIENT_WAITS, &Model::client_waits},
                 {EventType::CLIENT_WALKED_OUT, &Model::client_walked_out},
 
-                {EventType::FORCED_WALKED_OUT, &Model::client_walked_out}, // same as default
-                {EventType::FORCED_SAT, &Model::client_sat},               // same as default
-                {EventType::ERROR, nullptr}, // noop
+                // Generated events
+                {EventType::FORCED_WALKED_OUT, &Model::client_walked_out},
+                {EventType::FORCED_SAT, &Model::client_sat},
+                {EventType::ERROR, nullptr /* noop */ },
+                {EventType::DUMMY, nullptr /* noop */ },
         };
 
         void client_walked_in(Event const& event);

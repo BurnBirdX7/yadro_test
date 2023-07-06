@@ -5,30 +5,30 @@
 
 using namespace club;
 
-Model::Model(int table_count, Time start, Time end, int hour_price, Model::queue_t queue)
-    : start_(start)
-    , end_(end)
-    , hour_price_(hour_price)
+Model::Model(int table_count, Time start, Time end, int hourly_price, Model::queue_t queue)
+    : opening_time_(start)
+    , closing_time_(end)
+    , hourly_price_(hourly_price)
     , event_queue_(std::move(queue))
     , table_statistics_(table_count + 1)
     , open_tables_(table_count)
 {}
 
-void Model::run() {
-    std::cout << start_.toString() << '\n';
+void Model::run(std::ostream& out) {
+    out << opening_time_.toString() << '\n';
 
-    if (event_queue_.back().time() < end_) {
-        event_queue_.emplace_back(end_, EventType::DUMMY);
+    if (event_queue_.back().time() < closing_time_) {
+        event_queue_.emplace_back(closing_time_, EventType::DUMMY);
     }
 
     while (!event_queue_.empty()) {
         current_time_ = event_queue_.front().time();
 
         // Opening / Closing
-        if (!open_ && current_time_ > start_ && current_time_ < end_) {
-            open_ = true;
-        } else if (open_ && current_time_ >= end_) {
-            open_ = false;
+        if (!is_open_ && current_time_ > opening_time_ && current_time_ < closing_time_) {
+            is_open_ = true;
+        } else if (is_open_ && current_time_ >= closing_time_) {
+            is_open_ = false;
 
             if (event_queue_.front().type() == EventType::DUMMY) {
                 event_queue_.pop_front();
@@ -36,7 +36,7 @@ void Model::run() {
 
             // Force everybody outside
             for (auto const& [client, _] : client_status_ | std::views::reverse) {
-                event_queue_.emplace_front(end_, EventType::FORCED_WALKED_OUT, client);
+                event_queue_.emplace_front(closing_time_, EventType::FORCED_WALKED_OUT, client);
             }
             continue;
         }
@@ -44,7 +44,7 @@ void Model::run() {
         auto event = event_queue_.front();
         event_queue_.pop_front();
 
-        std::cout << event.toString() << '\n';
+        out << event.toString() << '\n';
 
         auto handler = handlers_.at(event.type());
         if (handler) {
@@ -52,10 +52,10 @@ void Model::run() {
         }
     }
 
-    std::cout << end_.toString() << '\n';
+    out << closing_time_.toString() << '\n';
     for (size_t i = 1; i < table_statistics_.size(); ++i) {
         auto [_, revenue, usage] = table_statistics_[i];
-        std::cout << std::format("{} {} {}\n", i, revenue, usage.toString());
+        out << std::format("{} {} {}\n", i, revenue, usage.toString());
     }
 }
 
@@ -64,10 +64,10 @@ void Model::produce_error(const std::string &msg) {
     event_queue_.emplace_front(current_time_, EventType::ERROR, msg);
 }
 
-void Model::update_revenue(int table_id) {
+void Model::update_table_statistics(int table_id) {
     auto& [busy, revenue, usage] = table_statistics_[table_id];
     auto passed_time = (current_time_ - busy->since);
-    revenue += passed_time.roundUp().hours() * hour_price_;
+    revenue += passed_time.roundUp().hours() * hourly_price_;
     usage += passed_time;
 
     busy = {};
@@ -75,7 +75,7 @@ void Model::update_revenue(int table_id) {
 
 void Model::open_table(int table_id) {
     if (table_statistics_[table_id].occupied()) {
-        update_revenue(table_id);
+        update_table_statistics(table_id);
     }
 
     if (client_queue_.empty()) {
@@ -94,7 +94,7 @@ void Model::open_table(int table_id) {
 void Model::client_walked_in(const Event &event) {
     if (client_status_.contains(event.client())) {
         produce_error("YouShallNotPass");
-    } else if (!open_) {
+    } else if (!is_open_) {
         produce_error("NotOpenYet");
     } else {
         client_status_.emplace(event.client(), 0);
@@ -112,11 +112,11 @@ void Model::client_sat(const Event &event) {
     }
 
     auto const &client = event.client();
-    int client_status = client_status_[client];
-    if (client_status > 0) {
-        open_table(client_status);
+    int status = client_status_[client];
+    if (status > 0) {
+        open_table(status);
         return;
-    } else if (client_status < 0) {
+    } else if (status < 0) {
         std::erase(client_queue_, client);
     }
 

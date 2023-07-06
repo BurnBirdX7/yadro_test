@@ -75,6 +75,11 @@ Event Event::from_string(std::string const& string) {
         event.table_ = table_id;
     }
 
+    if (!ss.eof()) {
+        throw std::system_error(std::make_error_code(std::errc::invalid_argument),
+                                "input string contains excessive information");
+    }
+
     return event;
 }
 
