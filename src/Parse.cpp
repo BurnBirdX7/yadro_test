@@ -6,7 +6,7 @@
 using namespace club;
 
 
-std::tuple<int, Time, Time, int> Parse::parse_header(std::istream& in) {
+std::tuple<int, Time, Time, int> Parse::header(std::istream& in) {
     std::string count_str, time_str, price_str;
     std::getline(in, count_str);
     std::getline(in, time_str);
@@ -42,7 +42,7 @@ std::tuple<int, Time, Time, int> Parse::parse_header(std::istream& in) {
 }
 
 
-Parse::queue_t Parse::parse_events(std::istream& in) {
+Parse::queue_t Parse::events(std::istream& in) {
     queue_t events{};
     Time lastTime{}; // Mark to track that time of incoming events is in ascending order
 

@@ -22,6 +22,7 @@ namespace club {
          * Parses string as time
          * String must be in HH:MM format
          * @param str string to parse
+         * @throws std::system_error if error occurred during parsing
          */
         explicit Time(std::string const& str);
 

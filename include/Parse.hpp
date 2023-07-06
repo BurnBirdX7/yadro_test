@@ -24,7 +24,7 @@ namespace club {
          * @return tuple: (table_count, start_time, end_time, hourly_price)
          * @throws PrintLineError thrown when error occurs during parsing, content must be printed
          */
-        static std::tuple<int, Time, Time, int> parse_header(std::istream& in);
+        static std::tuple<int, Time, Time, int> header(std::istream& in);
 
         /**
          * Parses event queue
@@ -32,7 +32,7 @@ namespace club {
          * @return queue
          * @throws PrintLineError thrown when error occurs during parsing, content must be printed
          */
-        static queue_t parse_events(std::istream& in);
+        static queue_t events(std::istream& in);
 
     private:
         virtual ~Parse() = 0;

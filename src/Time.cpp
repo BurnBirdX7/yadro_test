@@ -15,7 +15,16 @@ int int_from_2_digits(char const* data) {
 }
 
 Time::Time(const std::string &str) {
+    if (str.length() != 5) {
+        throw std::system_error(std::make_error_code(std::errc::invalid_argument),
+                                "Wrong time string length");
+    }
+
     char const* data = str.c_str();
+
+    if (str[2] != ':') {
+        throw std::system_error(std::make_error_code(std::errc::invalid_argument), "Wrong time delimiter");
+    }
 
     int hours = int_from_2_digits(data);
     int minutes = int_from_2_digits(data + 3);

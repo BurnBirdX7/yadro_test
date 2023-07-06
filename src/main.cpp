@@ -1,11 +1,9 @@
 #include <iostream>
-#include <string>
-#include <deque>
 #include <fstream>
 #include <sstream>
 #include <tuple>
-#include "Event.hpp"
 #include "Model.hpp"
+#include "Parse.hpp"
 
 
 void printHelp() {
@@ -30,8 +28,8 @@ int main(int argc, char** argv) {
     }
 
     try { // Catches parsing errors, PrintLineError
-        auto [table_count, start_time, end_time, price] = parse_header(fin);
-        auto incoming_events = parse_events(fin);
+        auto [table_count, start_time, end_time, price] = Parse::header(fin);
+        auto incoming_events = Parse::events(fin);
 
         auto model = Model(table_count, start_time, end_time, price, std::move(incoming_events));
         model.run();
