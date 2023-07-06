@@ -9,6 +9,7 @@ on:
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
         gcc_version: [10, 11, 12]
         build_type: [Release]
