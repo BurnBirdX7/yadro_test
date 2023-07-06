@@ -23,7 +23,7 @@ target_compile_options(task PUBLIC -pedantic -Wall -Werror)
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     message(NOTICE "Adding debug options...")
     target_compile_options(task PUBLIC -fsanitize=address -O0 -g)
-    target_link_libraries(task asan)
+    target_link_options(task PUBLIC -fsanitize=address)
 endif ()
 
 
