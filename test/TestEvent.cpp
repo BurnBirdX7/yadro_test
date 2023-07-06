@@ -19,7 +19,7 @@ static Time generate_time() {
 }
 
 
-static constexpr std::string client_name = "client1";
+static const std::string client_name = "client1";
 
 
 TEST(Event, Basic) {
