@@ -1,3 +1,5 @@
+#include <sstream>
+#include <iomanip>
 #include "Time.hpp"
 
 using namespace club;
@@ -40,7 +42,9 @@ Time::Time(int hours, int minutes)
 {}
 
 std::string Time::toString() const {
-    return std::to_string(hours()) + ':' + std::to_string(minutes());
+    std::ostringstream ss;
+    ss << std::setfill('0') << std::setw(2) << hours() << ':' << std::setw(2) << minutes();
+    return ss.str();
 }
 
 Time &Time::operator+=(const Time &other) {

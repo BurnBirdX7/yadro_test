@@ -1,12 +1,14 @@
 # Ядро - Тестовое задание
 
 # Requirements
- * Compiler
-   * GNU C++ Compiler 13+ (tested)
-   * Clang 16+ (theoretically)
-     * C++20's Ranges are used, that are not supported until Clang 16
+ * C++ Compiler
+   * GNU 10+
+     * tested: CI [ 10, 11, 12 ], locally [ 13 ]
+   * Clang 12+
+     * tested: CI [ 12, 13, 14 ], locally [ 15 ]
+ * CMake 3.8+
 
-## Build
+## Build with CMake
 
 In project's root run:
 
