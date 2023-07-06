@@ -1,6 +1,5 @@
 #include <functional>
 #include <ranges>
-#include <format>
 #include "Model.hpp"
 
 using namespace club;
@@ -55,7 +54,7 @@ void Model::run(std::ostream& out) {
     out << closing_time_.toString() << '\n';
     for (size_t i = 1; i < table_statistics_.size(); ++i) {
         auto [_, revenue, usage] = table_statistics_[i];
-        out << std::format("{} {} {}\n", i, revenue, usage.toString());
+        out << i << ' ' << revenue << ' ' << usage.toString() << '\n';
     }
 }
 

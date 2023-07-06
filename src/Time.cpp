@@ -1,5 +1,4 @@
 #include "Time.hpp"
-#include <format>
 
 using namespace club;
 
@@ -41,7 +40,7 @@ Time::Time(int hours, int minutes)
 {}
 
 std::string Time::toString() const {
-    return std::format("{:02}:{:02}", hours(), minutes());
+    return std::to_string(hours()) + ':' + std::to_string(minutes());
 }
 
 Time &Time::operator+=(const Time &other) {
