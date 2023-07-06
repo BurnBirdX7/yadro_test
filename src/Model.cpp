@@ -34,9 +34,11 @@ void Model::run(std::ostream& out) {
             }
 
             // Force everybody outside
-            for (auto const& [client, _] : client_status_ | std::views::reverse) {
-                event_queue_.emplace_front(closing_time_, EventType::FORCED_WALKED_OUT, client);
-            }
+//            for (auto const& [client, _] : client_status_ | std::views::reverse) {
+
+            std::for_each(client_status_.rbegin(), client_status_.rend(), [&](auto status) {
+                event_queue_.emplace_front(closing_time_, EventType::FORCED_WALKED_OUT, status.first);
+            });
             continue;
         }
 
