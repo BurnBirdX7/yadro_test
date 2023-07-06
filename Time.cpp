@@ -4,7 +4,7 @@
 using namespace club;
 
 int int_from_2_digits(char const* data) {
-    int i;
+    int i = -1;
 
     auto ret = std::from_chars(data, data + 2, i, 10);
     if (ret.ptr != data + 2) {

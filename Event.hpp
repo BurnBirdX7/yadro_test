@@ -15,7 +15,10 @@ namespace club {
         // outgoing:
         FORCED_WALKED_OUT = 11,
         FORCED_SAT = 12,
-        ERROR = 13
+        ERROR = 13,
+
+        // dummy
+        DUMMY = 21
     };
 
     class Event {
@@ -26,7 +29,7 @@ namespace club {
 
         [[nodiscard]] EventType   type()    const;
         [[nodiscard]] int         id()      const;
-        [[nodiscard]] Time   time()    const;
+        [[nodiscard]] Time        time()    const;
         [[nodiscard]] std::string client()  const;
         [[nodiscard]] std::string error()   const;
         [[nodiscard]] int         table()   const;
@@ -35,8 +38,8 @@ namespace club {
         std::string toString() const;
 
     private:
-        EventType type_;
         Time time_;
+        EventType type_;
         std::string text_ = {};
         int table_        = {};
     };

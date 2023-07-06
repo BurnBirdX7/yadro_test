@@ -12,6 +12,21 @@
 
 namespace club {
 
+    struct TableStatistics {
+        struct Busy {
+            std::string client;
+            Time since;
+        };
+
+        std::optional<Busy> busy  = {};
+        int revenue = 0;
+        Time usage  = {};
+
+        [[nodiscard]] inline bool occupied() const {
+            return busy.has_value();
+        }
+    };
+
     class Model {
     public:
         using queue_t = std::deque<Event>;
@@ -22,13 +37,8 @@ namespace club {
 
     private: // auxiliary
         void produce_error(std::string const& msg);
-        void update_revenue(int table_id, Time start_time);
+        void update_revenue(int table_id);
         void open_table(int table_id);
-
-        // Views:
-        bool client_inside(std::string const& client);
-        bool client_in_queue(std::string const& client);
-        bool client_sits(std::string const& client);
 
     private:
         // Essential:
@@ -48,13 +58,11 @@ namespace club {
          * = 0 - inside the club
          * < 0 - waits in the queue
          */
-        std::map<std::string, int> client_status = {};
+        std::map<std::string, int> client_status_ = {};
         std::deque<std::string> client_queue_;
 
         // Table statistics:
-        using table_info = std::pair<std::string /* who */, Time /* since when */>;
-        std::vector<std::optional<table_info>> table_status_;
-        std::vector<int> table_revenue_;
+        std::vector<TableStatistics> table_statistics_;
         int open_tables_;
 
     public: // handlers
