@@ -36,6 +36,8 @@ std::tuple<int, Time, Time, int> Parse::header(std::istream& in) {
         price = std::stoi(price_str);
     } catch (std::runtime_error const&) {
         throw PrintLineError(current_line);
+    } catch (std::invalid_argument const&) {
+        throw PrintLineError(current_line);
     }
 
     return {table_count, start_time, end_time, price};

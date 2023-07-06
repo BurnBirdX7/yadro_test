@@ -12,7 +12,9 @@ set(TASK_SRC
         )
 
 set(TEST_SRC
-        test/TestTime.cpp)
+        test/TestTime.cpp
+        test/TestEvent.cpp
+        test/TestParse.cpp)
 
 add_executable(task src/main.cpp ${TASK_SRC})
 target_include_directories(task PUBLIC include)
