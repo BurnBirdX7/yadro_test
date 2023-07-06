@@ -51,7 +51,7 @@ jobs:
 
     env:
       CC: clang-${{ matrix.clang_version }}
-      CXX: clang-${{ matrix.clang_version }}
+      CXX: clang++-${{ matrix.clang_version }}
 
     steps:
       - uses: actions/checkout@v3
