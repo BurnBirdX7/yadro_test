@@ -3,12 +3,40 @@ project(yadro_test)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CPP_SRC main.cpp Time.cpp Event.cpp Model.cpp)
 
-add_executable(task ${CPP_SRC})
+set(TASK_SRC
+        src/Parse.cpp
+        src/Time.cpp
+        src/Event.cpp
+        src/Model.cpp
+        )
 
-add_compile_options(task -Wall -Werror)
+set(TEST_SRC
+        test/test.cpp)
+
+add_executable(task src/main.cpp ${TASK_SRC})
+target_include_directories(task PUBLIC include)
+
+target_compile_options(task PUBLIC -Wall -Werror)
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     message(NOTICE "Adding debug options...")
-    add_compile_options(-fsanitize=address -O0 -g)
+    target_compile_options(task PUBLIC -fsanitize=address -O0 -g)
 endif ()
+
+
+# GTest:
+include(FetchContent)
+FetchContent_Declare(
+        googletest
+        GIT_REPOSITORY "https://github.com/google/googletest"
+        GIT_TAG v1.13.0
+)
+FetchContent_MakeAvailable(googletest)
+
+add_executable(test ${TASK_SRC} ${TEST_SRC})
+target_link_libraries(test PUBLIC gtest_main)
+target_include_directories(test PUBLIC include)
+
+include(GoogleTest)
+gtest_discover_tests(test)
+
