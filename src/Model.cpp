@@ -77,7 +77,7 @@ void Model::open_table(int table_id) {
         update_table_statistics(table_id);
     }
 
-    if (client_queue_.empty()) {
+    if (client_queue_.empty() || !is_open_) {
         return;
     }
 
@@ -143,11 +143,11 @@ void Model::client_walked_out(const Event &event) {
     }
 
     int client_status = client_status_.at(client);
+    client_status_.erase(client);
     if (client_status <= 0) {
         return;
     }
 
     open_table(client_status);
-    client_status_.erase(client);
     std::erase(client_queue_, client);
 }
