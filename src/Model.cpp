@@ -128,7 +128,7 @@ void Model::client_waits(const Event &event) {
     if (open_tables_ > 0) {
         produce_error("ICanWaitNoLonger!");
     }
-    if (client_queue_.size() >= table_statistics_.size()) {
+    if (client_queue_.size() >= table_count()) {
         event_queue_.emplace_front(current_time_, EventType::FORCED_WALKED_OUT, event.client());
     }
     client_status_[event.client()] = -1;
@@ -150,4 +150,8 @@ void Model::client_walked_out(const Event &event) {
 
     open_table(client_status);
     std::erase(client_queue_, client);
+}
+
+int Model::table_count() const {
+    return table_statistics_.size() - 1;
 }

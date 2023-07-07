@@ -69,6 +69,7 @@ TEST(Model, NoInNoOut) {
     assertEqualEvents(stream, {walkIn, expectedErrorIn, walkOut, expectedErrorOut});
 }
 
+
 TEST(Model, WalkInTwice) {
     std::string client = "brown";
 
@@ -84,6 +85,7 @@ TEST(Model, WalkInTwice) {
 
     assertEqualEvents(stream, {w1, w2, e1, f1});
 }
+
 
 TEST(Model, UnknownClient) {
     std::string client = "alien";
@@ -111,6 +113,7 @@ TEST(Model, UnknownClient) {
     assertEqualEvents(stream, {cr1, er1, cr2, er2, in3, fo3, in4, er4, in5, er5});
 }
 
+
 TEST(Model, ClientCannotWait) {
     std::string client = "they";
 
@@ -126,6 +129,7 @@ TEST(Model, ClientCannotWait) {
 
     assertEqualEvents(stream, {ev1, er2, fo3});
 }
+
 
 TEST(Model, ClientCanWait) {
     std::vector<std::string> clients = {"c1", "c2", "c3", "c4", "c5", "waits"};
@@ -148,3 +152,49 @@ TEST(Model, ClientCanWait) {
     assertEqualEvents(stream, events);
 }
 
+
+TEST(Model, ClientPulledFromQueue) {
+    std::string waiting_client = "waiting";
+    std::string sitting_client = "sitting";
+
+    Event e1 = {{9, 10}, EventType::CLIENT_WALKED_IN, sitting_client};
+    Event e2 = {{9, 11}, EventType::CLIENT_SAT, sitting_client, 2};
+    Event e3 = {{10, 0}, EventType::CLIENT_WAITS, waiting_client};
+    Event e_ = {{10, 0}, EventType::ERROR, "ICanWaitNoLonger!"};
+    Event e4 = {{10, 10}, EventType::CLIENT_WALKED_OUT, sitting_client};
+    Event f5 = {{10, 10}, EventType::FORCED_SAT, waiting_client, 2};
+    Event f6 = {{19, 0}, EventType::FORCED_WALKED_OUT, waiting_client};
+
+    Model model = createModel({e1, e2, e3, e4});
+    std::stringstream stream;
+    model.run(stream);
+
+    assertEqualEvents(stream, {e1, e2, e3, e_, e4, f5, f6});
+}
+
+
+TEST(Model, QueueFilled) {
+
+    std::deque<Event> events = {
+            {{9, 10}, EventType::CLIENT_WALKED_IN, "c1"},
+            {{9, 11}, EventType::CLIENT_WALKED_IN, "c2"},
+            {{9, 12}, EventType::CLIENT_SAT, "c1", 1},
+            {{9, 13}, EventType::CLIENT_SAT, "c2", 2},
+            {{9, 14}, EventType::CLIENT_WAITS, "c3"},
+            {{9, 15}, EventType::CLIENT_WAITS, "c4"},
+            {{10, 0}, EventType::CLIENT_WAITS, "__"}
+    };
+
+    Model model = {2, {9, 0}, {19, 0}, 100, events};
+    std::stringstream stream;
+    model.run(stream);
+
+    events.emplace_back(Time{10, 0}, EventType::FORCED_WALKED_OUT, "__");
+    for (int i = 1; i <= 4; ++i) {
+        events.emplace_back(
+                Time{19, 0}, EventType::FORCED_WALKED_OUT, "c" + std::to_string(i)
+                );
+    }
+
+    assertEqualEvents(stream, events);
+}

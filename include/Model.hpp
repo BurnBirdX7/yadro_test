@@ -67,6 +67,8 @@ namespace club {
          */
         void open_table(int table_id);
 
+        int table_count() const;
+
     private:
         // Essential:
         Time opening_time_;
