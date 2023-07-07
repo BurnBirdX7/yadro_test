@@ -67,7 +67,7 @@ namespace club {
          */
         void open_table(int table_id);
 
-        int table_count() const;
+        size_t table_count() const;
 
     private:
         // Essential:

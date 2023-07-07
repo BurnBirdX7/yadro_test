@@ -152,6 +152,6 @@ void Model::client_walked_out(const Event &event) {
     std::erase(client_queue_, client);
 }
 
-int Model::table_count() const {
+size_t Model::table_count() const {
     return table_statistics_.size() - 1;
 }
