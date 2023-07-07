@@ -28,7 +28,7 @@ protected:
         price_expected = price;
     }
 
-    void TearDown() {
+    void TearDown() override {
         ASSERT_EQ(tables_expected, tables);
         ASSERT_EQ(start_expected, start);
         ASSERT_EQ(end_expected, end);

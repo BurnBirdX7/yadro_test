@@ -34,8 +34,6 @@ void Model::run(std::ostream& out) {
             }
 
             // Force everybody outside
-//            for (auto const& [client, _] : client_status_ | std::views::reverse) {
-
             std::for_each(client_status_.rbegin(), client_status_.rend(), [&](auto status) {
                 event_queue_.emplace_front(closing_time_, EventType::FORCED_WALKED_OUT, status.first);
             });
@@ -138,12 +136,18 @@ void Model::client_waits(const Event &event) {
 }
 
 void Model::client_walked_out(const Event &event) {
-    int client_status = client_status_[event.client()];
+    auto client = event.client();
+    if (!client_status_.contains(client)) {
+        event_queue_.emplace_front(current_time_, EventType::ERROR, "ClientUnknown");
+        return;
+    }
+
+    int client_status = client_status_.at(client);
     if (client_status <= 0) {
         return;
     }
 
     open_table(client_status);
-    client_status_.erase(event.client());
-    std::erase(client_queue_, event.client());
+    client_status_.erase(client);
+    std::erase(client_queue_, client);
 }

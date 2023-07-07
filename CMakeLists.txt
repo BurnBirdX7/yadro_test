@@ -8,13 +8,13 @@ set(TASK_SRC
         src/Parse.cpp
         src/Time.cpp
         src/Event.cpp
-        src/Model.cpp
-        )
+        src/Model.cpp)
 
 set(TEST_SRC
         test/TestTime.cpp
         test/TestEvent.cpp
-        test/TestParse.cpp)
+        test/TestParse.cpp
+        test/TestModel.cpp)
 
 add_executable(task src/main.cpp ${TASK_SRC})
 target_include_directories(task PUBLIC include)

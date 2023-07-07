@@ -25,8 +25,8 @@ cmake --build build_dir --target task
 
 ## Test
 
-````shell
+```shell
 cmake --build build_dir --target test
 ./build_dir/test
-````
+```
 
